@@ -19,3 +19,33 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
+import Apollo
+
+class Network {
+    static let shared = Network()
+    
+    private(set) lazy var apollo = ApolloClient(url: URL(string: "http://localhost:8080/graphql")!)
+}
+
+//class Network {
+//    static let shared = Network()
+//
+//    private(set) lazy var apollo: ApolloClient = {
+//        let httpNetworkTransport = HTTPNetworkTransport(url: URL(string: "http://localhost:8080/graphql")!)
+//        httpNetworkTransport.delegate = self
+//        return ApolloClient(networkTransport: httpNetworkTransport)
+//    }()
+//}
+//
+//extension Network: HTTPNetworkTransportPreflightDelegate {
+//    func networkTransport(_ networkTransport: HTTPNetworkTransport, shouldSend request: URLRequest) -> Bool {
+//        true
+//    }
+//
+//    func networkTransport(_ networkTransport: HTTPNetworkTransport, willSend request: inout URLRequest) {
+//        let token = "hogehoge"
+//        request.addValue(token, forHTTPHeaderField: "Authorization")
+//    }
+//}
+//

@@ -1,0 +1,69 @@
+# -*- coding: utf-8 -*-
+
+# Constants
+
+GRAPHQL_ENDPOINT = "https://graphql-pokemon.now.sh/"
+APOLLO_OUTPUT = "../Apollo"
+GRAPHQL_SEARCH_PATH = "../**/*.graphql"
+LOCAL_SCHEMA_PATH = "#{APOLLO_OUTPUT}/schema.json"
+GENERATE_FILE_PATH = "#{APOLLO_OUTPUT}/API.swift"
+
+# Functions
+
+def download_graphql_schema(endpoint, output)
+  sh("./node_modules/apollo/bin/run service:download --endpoint=#{endpoint} #{output}")
+end
+
+def lint_graphql_file(config, search_path)
+  sh("./node_modules/eslint/bin/eslint.js -c #{config} #{search_path}; printf $?;") == "0"
+end
+
+def generate_apollo_interface_file(search_path, schema_file, output)
+  sh("./node_modules/apollo/bin/run codegen:generate --target=swift --includes=#{search_path} --localSchemaFile=#{schema_file} #{output}")
+end
+
+def make_output_dir
+  sh("mkdir -p #{APOLLO_OUTPUT}")
+end
+
+platform :ios do
+  desc "GraphQLスキーマファイルに変更がないかチェックします"
+  lane :check_graphql_schema_update do
+    make_output_dir
+
+    if File.exist?(LOCAL_SCHEMA_PATH)
+      tmp_file = "#{LOCAL_SCHEMA_PATH}.tmp"
+      download_graphql_schema(GRAPHQL_ENDPOINT, tmp_file)
+
+      outdated = File.read(LOCAL_SCHEMA_PATH).strip != File.read(tmp_file).strip
+      if outdated
+        notification(title: "Check GraphQL Schema Update️", message: "schema.json is outdated")
+      end
+
+      FileUtils.rm(tmp_file)
+    else
+      notification(title: "Check GraphQL Schema Update️", message: "schema.json was not found")
+    end
+  end
+
+  desc "GraphQLファイルの静的解析を行います"
+  lane :lint_graphql_files do
+    unless lint_graphql_file("./.eslintrc.js", GRAPHQL_SEARCH_PATH)
+      notification(title: "GraphQL Lint Failed ☠️", message: "Please check the log")
+    end
+  end
+
+  desc "取得済みGraphQLスキーマファイルを用いて、SwiftのGraphQLインターフェースを再ジェネレートします"
+  lane :generate_graphql_interface do
+    make_output_dir
+    generate_apollo_interface_file(GRAPHQL_SEARCH_PATH, LOCAL_SCHEMA_PATH, GENERATE_FILE_PATH)
+  end
+
+  desc "最新のGraphQLスキーマファイルをDLして、コードを再ジェネレートします"
+  lane :update_graphql_schema do
+    make_output_dir
+    download_graphql_schema(GRAPHQL_ENDPOINT, LOCAL_SCHEMA_PATH)
+    generate_graphql_interface
+    lint_graphql_files
+  end
+end
