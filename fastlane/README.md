@@ -36,6 +36,11 @@ fastlane ios generate_graphql_interface
 fastlane ios update_graphql_schema
 ```
 最新のGraphQLスキーマファイルをDLして、コードを再ジェネレートします
+### ios npm_install
+```
+fastlane ios npm_install
+```
+npm_install
 
 ----
 

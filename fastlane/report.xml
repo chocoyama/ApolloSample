@@ -5,12 +5,12 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.005603">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.009729">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: ./node_modules/eslint/bin/eslint.js -c ./.eslintrc.js ../**/*.graphql; printf $?;" time="0.61225">
+      <testcase classname="fastlane.lanes" name="1: npm install" time="2.520226">
         
       </testcase>
     

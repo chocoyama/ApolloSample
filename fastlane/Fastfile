@@ -18,8 +18,8 @@ import "GraphQLFile"
 default_platform(:ios)
 
 platform :ios do
-    desc "Run tests"
-    lane :test do
-        scan(clean: true)
+    desc "npm_install"
+    lane :npm_install do
+        sh("npm install")
     end
 end
